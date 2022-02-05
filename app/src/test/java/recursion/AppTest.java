@@ -53,26 +53,6 @@ Tree 2
 		assertEquals("Tree 4: 10 14 25 55 56 58 60 63", tree4.inOrderToString());
 	}
 
-	@Test void treeOneMatches() {
-		assertEquals(tree1, tree3);
-	}
-
-	@Test void testNodesInLevelZero() {
-		assertEquals(1, tree4.nodesInLevel(0));
-	}
-
-	@Test void testNodesInLevelTwo() {
-		assertEquals(3, tree4.nodesInLevel(2));
-	}
-
-	@Test void testNodesInLevelDNE() {
-		assertEquals(0, tree4.nodesInLevel(7), "If the specified level does not exist in the tree 0 should be returned");
-	}
-
-	@Test void testGetByKey() {
-		assertEquals(14, tree1.getByKey(14).element);
-	}
-
 	@Test void testBalanceTree() {
 		Tree<Integer> treeToBalance = new Tree<>(this.v2, "Tree 4");
 		String valid = 
@@ -89,8 +69,61 @@ Tree 4
 		assertEquals(valid, treeToBalance.toString());
 	}
 
+	@Test void testGetByKey() {
+		assertEquals(14, tree1.getByKey(14).element);
+	}
+
+	@Test void testNodesInLevelZero() {
+		assertEquals(1, tree4.nodesInLevel(0));
+	}
+
+	@Test void testNodesInLevelTwo() {
+		assertEquals(3, tree4.nodesInLevel(2));
+	}
+
+	@Test void testNodesInLevelDNE() {
+		assertEquals(0, tree4.nodesInLevel(7), "If the specified level does not exist in the tree 0 should be returned");
+	}
+
+	@Test void treeOneMatches() {
+		assertEquals(tree1, tree3);
+	}
+
+	@Test void testGetAllPaths() {
+		String valid = 
+"""
+25 10 8 6
+25 10 8 9
+25 10 14
+25 60 55 50
+25 60 55 58 56
+25 60 63""";
+		assertEquals(valid, tree1.getAllPaths());
+	}
+
+	@Test void testGetAllPathsTwo() {
+		String valid = 
+"""
+200 15 3
+200 15 65 83 70
+200 15 65 83 90""";
+		assertEquals(valid, tree2.getAllPaths());
+	}
+
+	@Test void testTreeOneInOrderSuccessor() {
+		assertEquals(tree1.getByKey(10), tree1.inOrderSuccessor(tree1.getByKey(9)));
+	}
+
 	@Test void testGetDepth() {
-		System.out.println(tree4.toString());
 		assertEquals(5, tree4.getDepth());
+	}
+
+	@Test void testCountBST() {
+		assertEquals(12,tree1.countBST());
+	}
+	@Test void testFlipWithCountBST() {
+		var tree5 = new Tree<>(this.v1, "Tree 5");
+		tree5.flip();
+		assertEquals(6, tree5.countBST());
 	}
 }

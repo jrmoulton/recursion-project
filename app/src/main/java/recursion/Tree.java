@@ -47,7 +47,7 @@ public class Tree<E extends Comparable<? super E>> {
 	 */
 	@Override
 	public String toString() {
-		// TODO:
+		// DONE:
 		var sortedElements = new ArrayList<BinaryTreeNode>();
 		furthestLeft(this.root, sortedElements);
 		var sb = new StringBuilder();
@@ -74,16 +74,7 @@ public class Tree<E extends Comparable<? super E>> {
 		if (root.equals(target)) {
 			return count;
 		}
-		int leftCount = 0; 
-		int rightCount = 0;
-
-		if (root.left != null) {
-			leftCount = getDepthFromParent(root.left, target, count+1);
-		}
-		if (root.right != null) {
-			rightCount = getDepthFromParent(root.right, target, count+1);
-		}
-		return Math.max(leftCount, rightCount);
+		return getDepthFromParent(root, target.parent, count+1);
 	}
 
 	
@@ -91,27 +82,20 @@ public class Tree<E extends Comparable<? super E>> {
 		 return recurseDepth(this.root, 1);
 	}
 	private int recurseDepth(BinaryTreeNode root, int count) {
+		if (root == null) {
+			return 0;
+		}
 		if (root.left == null && root.right == null)  {
 			 return count;
 		}
-
-		int leftCount = 0; 
-		int rightCount = 0;
-
-		if (root.left != null) {
-			leftCount = recurseDepth(root.left, count + 1);
-		}
-		if (root.right != null) {
-			rightCount = recurseDepth(root.right, count + 1);
-		}
-		return Math.max(leftCount, rightCount);
+		return Math.max(recurseDepth(root.left, count + 1), recurseDepth(root.right, count + 1));
 	}
 
 	/**
 	 * Return a string containing the tree contents as a single line
 	 */
 	public String inOrderToString() {
-		// Done:
+		// DONE:
 		var sortedElements = new ArrayList<BinaryTreeNode>();
 		var sb = new StringBuilder();
 		sb.append(this.name);
@@ -124,7 +108,6 @@ public class Tree<E extends Comparable<? super E>> {
 		sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}
-
 	private void furthestLeft(BinaryTreeNode node, ArrayList<BinaryTreeNode> sortedElements) {
 		if (node == null) {
 			return;
@@ -138,10 +121,9 @@ public class Tree<E extends Comparable<? super E>> {
 	 * reverse left and right children recursively
 	 */
 	public void flip() {
-		// Done:
+		// DONE:
 		swapRecurse(this.root);
 	}
-
 	private void swapRecurse(BinaryTreeNode node) {
 		if (node == null) {
 			return;
@@ -159,8 +141,26 @@ public class Tree<E extends Comparable<? super E>> {
 	 * @param node node from which to find the in-order successor
 	 */
 	public BinaryTreeNode inOrderSuccessor(BinaryTreeNode node) {
-		// TODO:
-		return null;
+		// DONE:
+		if (node.right != null) {
+			return findFurthestLeftNode(node.right, node);
+		} 
+		if (node.parent == null) {
+			return null;
+		}
+		if (node.equals(node.parent.right)) {
+			return node.parent.parent;
+		}
+		return findFurthestLeftNode(node.parent, node);
+	}
+	private BinaryTreeNode findFurthestLeftNode(BinaryTreeNode node, BinaryTreeNode start) {
+		if (node.left == null) {
+			return node;
+		}
+		if (node.left.equals(start)) {
+			return node;
+		}
+		return findFurthestLeftNode(node.left, start);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class Tree<E extends Comparable<? super E>> {
 	 * @return count of number of nodes at specified level
 	 */
 	public int nodesInLevel(int level) {
-		// Done:
+		// DONE:
 		return getLevelCount(0, level, this.root);
 
 	}
@@ -189,7 +189,33 @@ public class Tree<E extends Comparable<? super E>> {
 	 * Print all paths from root to leaves
 	 */
 	public void printAllPaths() {
-		// TODO:
+		// DONE:
+		System.out.println(getAllPaths());
+	}
+	public String getAllPaths() {
+		var finalSB = new StringBuilder();
+		var temp = new StringBuilder();
+		recurseGetAllPaths(this.root, temp, finalSB);
+		finalSB.deleteCharAt(finalSB.length() - 1);
+		return finalSB.toString();
+	}
+	private void recurseGetAllPaths(BinaryTreeNode node, StringBuilder sb, StringBuilder finalSB) {
+		var newSB = new StringBuilder(sb);
+		newSB.append(node.element.toString());
+		if (node.left != null) {
+			newSB.append(" ");
+			recurseGetAllPaths(node.left, newSB, finalSB);
+		}
+		if (node.right != null) {
+			if (newSB.charAt(newSB.length()-1) != ' ') {
+				newSB.append(" ");
+			}
+			recurseGetAllPaths(node.right, newSB, finalSB);
+		}
+		if (node.left == null && node.right == null) {
+			newSB.append("\n");
+			finalSB.append(newSB);
+		}
 	}
 
 	/**
@@ -198,8 +224,33 @@ public class Tree<E extends Comparable<? super E>> {
 	 * @return Count of embedded binary search trees
 	 */
 	public int countBST() {
-		// TODO:
-		return 0;
+		// DONE:
+		return countRecurseBST(this.root).first;
+	}
+	private Tuple<Integer, Boolean> countRecurseBST(BinaryTreeNode node) {
+		var leftValues = new Tuple<Integer, Boolean>(0, true);
+		var rightValues = new Tuple<Integer, Boolean>(0, true);
+		if (node.left != null) {
+			leftValues = countRecurseBST(node.left);
+		}
+		if (node.right != null) {
+			rightValues = countRecurseBST(node.right);
+		}
+		if (!leftValues.second || !rightValues.second || !isBST(node)) {
+			return new Tuple<Integer,Boolean>(leftValues.first + rightValues.first, false);
+		}
+		return new Tuple<Integer,Boolean>(1+leftValues.first+rightValues.first, true);
+	}
+	private boolean isBST(BinaryTreeNode node) {
+		boolean nodeRight = true;
+		boolean nodeLeft = true;
+		if (node.left != null) {
+			nodeLeft = node.left.element.compareTo(node.element) < 0;
+		}
+		if (node.right != null) {
+			nodeRight = node.right.element.compareTo(node.element) > 0;
+		}
+		return nodeLeft && nodeRight;
 	}
 
 	/**
@@ -212,7 +263,7 @@ public class Tree<E extends Comparable<? super E>> {
 	}
 
 	public BinaryTreeNode getByKey(E key) {
-		// TODO:
+		// DONE:
 		return findKey(key, this.root);
 	}
 
@@ -231,7 +282,7 @@ public class Tree<E extends Comparable<? super E>> {
 	 * Balance the tree
 	 */
 	public void balanceTree() {
-		// Done
+		// DONE
 		var extractedElements = new ArrayList<BinaryTreeNode>();
 		furthestLeft(this.root, extractedElements);
 		this.root = new BinaryTreeNode(extractedElements.get((extractedElements.size() / 2)).element);
@@ -329,6 +380,17 @@ public class Tree<E extends Comparable<? super E>> {
 		}
 		var temp = recurseEquals(lhs.left, rhs.left);
 		return recurseEquals(lhs.right, rhs.right) && temp;
+	}
+
+	private class Tuple<A, B> {
+		A first;
+		B second;
+
+        public Tuple(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+		public Tuple() {}
 	}
 
 	// Basic node stored in unbalanced binary trees
